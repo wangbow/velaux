@@ -21,6 +21,7 @@ import {
   ApplicationDeployRequest,
   Trait,
   UpdateComponentProperties,
+  WorkflowStatus,
 } from '../interface/application';
 
 interface TraitQuery {
@@ -211,3 +212,20 @@ export function updateComponentProperties(params: UpdateComponentProperties) {
   delete params.componentName;
   return put(url, params).then((res) => res);
 }
+
+
+export function resumeApplicationWorkflowRecord(params: { appName: string,workflowName:string,record:Array<WorkflowStatus> }) {
+  const {appName,workflowName, record} = params;
+  return get(`${application}/${appName}/workflows/${workflowName}records/${record}/resume`, {}).then((res) => res);
+}
+
+export function rollbackApplicationWorkflowRecord(params: { appName: string,workflowName:string,record:Array<WorkflowStatus> }) {
+  const {appName,workflowName, record} = params;
+  return get(`${application}/${appName}/workflows/${workflowName}records/${record}/rollback`, {}).then((res) => res);
+}
+
+export function terminateApplicationWorkflowRecord(params: { appName: string,workflowName:string,record:Array<WorkflowStatus> }) {
+  const {appName,workflowName, record} = params;
+  return get(`${application}/${appName}/workflows/${workflowName}records/${record}/terminate`, {}).then((res) => res);
+}
+

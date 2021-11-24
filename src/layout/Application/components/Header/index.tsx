@@ -24,9 +24,12 @@ import {
   Workflow,
   WorkflowStatus,
 } from '../../../../interface/application';
+import { WorkFlowData } from '../../../../pages/ApplicationWorkflowRecord/entity'
 import NumItem from '../../../../components/NumItem';
 import { Link } from 'dva/router';
 import { handleError, APIError } from '../../../../utils/errors';
+import ApplicationWorkflowRecord from '../../../../pages/ApplicationWorkflowRecord/index';
+import './index.less';
 
 const { Row, Col } = Grid;
 
@@ -35,12 +38,22 @@ interface Props {
   applicationDetail?: ApplicationDetail;
   applicationStatus?: { status?: ApplicationStatus };
   workflows?: Array<Workflow>;
+  dispatch: ({ }) => {};
+  match: {
+    params: {
+      appName: string;
+    };
+  };
+  history: {
+    push: (path: string, state: {}) => {};
+  };
 }
 
 interface State {
   loading: boolean;
   statistics?: ApplicationStatistics;
-  records?: Array<WorkflowStatus>;
+  records?: Array<WorkFlowData>;
+  isWorkflowRecord:boolean
 }
 
 @connect((store: any) => {
@@ -51,6 +64,7 @@ class ApplicationHeader extends Component<Props, State> {
     super(props);
     this.state = {
       loading: true,
+      isWorkflowRecord:true,
     };
   }
 
@@ -114,14 +128,21 @@ class ApplicationHeader extends Component<Props, State> {
 
   componentDidMount() {
     this.loadAppStatistics();
-    this.loadworkflowRecord();
+    // this.loadworkflowRecord();
+  }
+
+  updateWorkflowRecord(isWorkflowRecord:boolean){
+    this.setState({
+      isWorkflowRecord:isWorkflowRecord
+    })
   }
 
   render() {
-    const { applicationDetail, currentPath, workflows } = this.props;
-    const { statistics, records } = this.state;
+    const { applicationDetail, currentPath, workflows, dispatch, match, history } = this.props;
+    const { statistics, records, isWorkflowRecord } = this.state;
     const activeKey = currentPath.substring(currentPath.lastIndexOf('/') + 1);
     const item = <Translation>{`app-${activeKey}`}</Translation>;
+
     return (
       <div>
         <Row>
@@ -192,13 +213,20 @@ class ApplicationHeader extends Component<Props, State> {
               </Row>
             </Card>
           </Col>
-          <Col span={12} className="padding16">
-            <Card>
-              {records?.map((record) => {
-                record.steps.map((step) => {
+          <Col span={12} className="padding16 workflow-card-wraper">
+            <Card contentHeight={120}>
+              {/* {records?.map((record) => {
+                return record.steps.map((step) => {
                   return <span>{step.name || step.type}</span>;
                 });
-              })}
+              })} */}
+              <ApplicationWorkflowRecord
+                workflowList={[]}
+                applicationDetail={applicationDetail}
+                dispatch={dispatch}
+                match={match}
+                history={history}
+              />
             </Card>
           </Col>
         </Row>

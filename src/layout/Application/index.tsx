@@ -11,6 +11,9 @@ const { Row, Col } = Grid;
 interface Props {
   match: any;
   dispatch: any;
+  history: {
+    push: (path: string, state: {}) => {};
+  };
 }
 @connect((store: any) => {
   return { ...store.application };
@@ -88,7 +91,7 @@ class ApplicationLayout extends Component<Props, any> {
 
   render() {
     const { loading, activeName } = this.state;
-    const { children, dispatch } = this.props;
+    const { children, dispatch,match, history } = this.props;
     const {
       path,
       params: { appName, envName },
@@ -101,9 +104,11 @@ class ApplicationLayout extends Component<Props, any> {
     if (loading) {
       return loadingDom;
     }
+
+
     return (
       <div className="applayout">
-        <Header currentPath={path}></Header>
+        <Header currentPath={path} dispatch={dispatch} match={match} history={history}></Header>
         <EnvTabs dispatch={dispatch} activeKey={envName ? envName : 'basisConfig'}></EnvTabs>
         <Row className="padding16 main">
           <div className="menu">

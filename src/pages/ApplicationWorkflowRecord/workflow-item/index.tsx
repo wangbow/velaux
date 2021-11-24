@@ -32,46 +32,58 @@ type WorkFlowItemProps = {
   edit?: boolean;
   data: EdgesAndNodes;
   workFlowDefinitions: [];
+  workflowName:string;
+  isWorkflowRecord:boolean;
 };
 
 type State = {
   visible: boolean;
   currentSelectedNodeData: any;
+  isWorkflowRecord:boolean;
 };
 
 class WorkFlowItem extends Component<WorkFlowItemProps, State> {
   container: any;
   diagramMaker: any;
+  nodeItem: any;
   constructor(props: WorkFlowItemProps) {
     super(props);
     this.state = {
       visible: false,
       currentSelectedNodeData: {},
+      isWorkflowRecord:true,
     };
-  }  
+  }
+
+  updateChange = (isWorkflowRecord:boolean)=>{
+    this.setState({isWorkflowRecord:isWorkflowRecord})
+  }
+
   componentDidMount() {
-    if(this.diagramMaker){
+    if (this.diagramMaker) {
       this.diagramMaker.destroy();
     }
-
     const platformWidth = this.container.clientWidth;
-    const platformHeight = 300;
-    const { data, edit } = this.props;
+    const platformHeight = 90;
+    const { data, edit, workflowName} = this.props;
     const basicePlatformConfig = {
       panels: WORKFLOW_COMMON_PANNEL,
       workspace: {
         position: {
           x: 0,
           y: 0,
+          zIndex:1111
         },
         scale: 1,
         canvasSize: {
           width: platformWidth,
           height: platformHeight,
+          zIndex:1111
         },
         viewContainerSize: {
           width: platformWidth,
           height: platformHeight,
+          zIndex:1111
         },
       },
       editor: {
@@ -93,20 +105,22 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
         },
         renderCallbacks: {
           node: (node: DiagramMakerNode<{}>, container: HTMLElement) => {
-            console.log(node);
             ReactDOM.render(
               <WorkFlowNode
                 id={node.id}
+                workflowName={workflowName}
                 data={node.consumerData}
                 selected={node.diagramMakerData.selected}
                 workflowId={this.props.workflowId}
                 typeId={node.typeId}
+                isWorkflowRecord={this.state.isWorkflowRecord}
+                updateChange = {(isWorkflowRecord:boolean)=>{this.updateChange(isWorkflowRecord)}}
+                ref={(ref) => (this.nodeItem = ref)}
               />,
               container,
             );
           },
           edge: (edge: DiagramMakerEdge<{}>, container: HTMLElement) => {
-            console.log(edge);
             ReactDOM.render(<WorkFlowEdge id={edge.id} data={edge.consumerData} />, container);
           },
           destroy: (container: HTMLElement) => {
@@ -182,7 +196,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
               return state;
           }
         },
-        eventListener: (e) => {},
+        eventListener: (e) => { },
       },
     );
 
@@ -275,10 +289,16 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
     );
   };
 
-  // componentWillUnmount = () => {
-  //   this.diagramMaker && this.diagramMaker.destroy();
-  // };
-  
+  componentWillUnmount = () => {
+    console.log('item unmount');
+    sessionStorage.setItem('isWorkflowRecord','false');
+    this.nodeItem && this.nodeItem.setState({
+      isWorkflowRecord:false
+    });
+    // this.nodeItem && this.nodeItem.onClose();
+    console.log('item2 unmount');
+  };
+
   componentWillReceiveProps = (nextProps: WorkFlowItemProps) => {
     if (nextProps.edit !== this.props.edit) {
       if (nextProps.edit) {
@@ -341,7 +361,7 @@ class WorkFlowItem extends Component<WorkFlowItemProps, State> {
       <div>
         <div
           ref={(element: HTMLDivElement) => (this.container = element)}
-          className="workflow-item-container"
+          className="workflowrecord-item-container"
           id={this.props.workflowId}
         />
         <Drawer

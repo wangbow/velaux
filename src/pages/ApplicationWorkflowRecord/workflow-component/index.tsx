@@ -9,31 +9,17 @@ import './index.less';
 
 type Props = {
   getWorkflow: () => void;
-  dispatch: ({ }) => {};
+  dispatch: ({}) => {};
   key: string;
   appName: string;
   data: WorkFlowData;
   workFlowDefinitions: [];
+  isWorkflowRecord:boolean;
 };
 
 type State = {
   errorFocus: boolean;
 };
-
-
-type NodeItem = {
-  consumerData: {
-    alias?: string;
-    dependsOn?: null,
-    description?: string
-    name: string;
-    properties: string;
-    type: string;
-  },
-  diagramMakerData: {}
-  id: string;
-  typeId: string;
-}
 
 class WorkFlowComponent extends Component<Props, State> {
   field;
@@ -47,11 +33,11 @@ class WorkFlowComponent extends Component<Props, State> {
     this.field = new Field(this);
   }
 
-  componentDidMount() { }
+  componentDidMount() {}
 
   setEditView = (name: string, edit: boolean) => {
     this.props.dispatch({
-      type: 'workflow/setEditView',
+      type: 'workflowRecord/setEditView',
       payload: {
         name,
         edit,
@@ -74,7 +60,7 @@ class WorkFlowComponent extends Component<Props, State> {
     });
   };
 
-  setWorkflowState = (name: string, enable: boolean) => { };
+  setWorkflowState = (name: string, enable: boolean) => {};
 
   saveWorkflow = (name: string) => {
     this.setState({
@@ -94,26 +80,14 @@ class WorkFlowComponent extends Component<Props, State> {
         });
         return;
       }
-
-      const nodeArr: Array<NodeItem> = Object.values(nodes)
-      const find = nodeArr.find(item => !item.consumerData);
-
-      if (find) {
-        Message.error('please enter node name,enter type');
-        this.setState({
-          errorFocus: true,
-        });
-        return;
-      }
       const { name, alias, description } = values;
       data.appName = data.appName || this.props.appName;
       data.name = name;
       data.alias = alias;
       data.description = description;
       data.data = workflowData;
-
       this.props.dispatch({
-        type: 'workflow/saveWorkflow',
+        type: 'workflowRecord/saveWorkflow',
         payload: data,
         callback: () => {
           this.props.getWorkflow();
@@ -126,40 +100,15 @@ class WorkFlowComponent extends Component<Props, State> {
     const { data, workFlowDefinitions } = this.props;
     const { errorFocus } = this.state;
     const option: WorkFlowOption = data.option || { default: true, edit: true, enable: true };
-    const menu = (
-      <Menu>
-        <Menu.Item>查看历史记录</Menu.Item>
-        <Menu.Item>设置为默认</Menu.Item>
-        <If condition={option.enable}>
-          <Menu.Item
-            onClick={() => {
-              this.setWorkflowState(data.name, false);
-            }}
-          >
-            禁用
-          </Menu.Item>
-        </If>
-        <If condition={!option.enable}>
-          <Menu.Item
-            onClick={() => {
-              this.setWorkflowState(data.name, true);
-            }}
-          >
-            启用
-          </Menu.Item>
-        </If>
-        <Menu.Item onClick={() => this.deleteWorkflow(data.name)}>删除</Menu.Item>
-      </Menu>
-    );
     const { init } = this.field;
     return (
       <div
         className={
-          errorFocus ? 'workflow-component-container error' : 'workflow-component-container'
+          errorFocus ? 'workflowrecord-component-container error' : 'workflowrecord-component-container'
         }
         id={data.name}
       >
-        <div className="workflow-component-title-container">
+        {/* <div className="workflow-component-title-container">
           <div className="workflow-component-title-content">
             <If condition={!option.edit}>
               <div className="workflow-title">{data.alias || data.name}</div>
@@ -223,14 +172,16 @@ class WorkFlowComponent extends Component<Props, State> {
               </Dropdown>
             </div>
           </div>
-        </div>
+        </div> */}
         <div className="workflow-detail-container">
           <WorkFlowItem
+            workflowName = {data.name ||''}
             ref={(ref) => (this.workflowItem = ref)}
             data={data.data || { nodes: {}, edges: {} }}
-            workflowId={data.appName || ''}
+            workflowId={data.appName || this.props.appName}
             workFlowDefinitions={workFlowDefinitions}
             edit={option.edit}
+            isWorkflowRecord={this.props.isWorkflowRecord}
           />
         </div>
       </div>

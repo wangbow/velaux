@@ -51,7 +51,7 @@ export default {
     updateApplicationEnvbinding(state, { type, payload }) {
       return {
         ...state,
-        envbinding: payload.envBindings || [],
+        envbinding: payload && payload.envBindings || [],
       };
     },
     updateApplicationStatus(state, { type, payload }) {
